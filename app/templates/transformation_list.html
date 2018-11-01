@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <style>
+          table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+            }
+                      td, th {
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding: 8px;
+            }
+      </style>
+         <script type=text/javascript src="{{
+  url_for('static', filename='jquery-3.1.1.js') }}"></script>
+       <script type=text/javascript src="{{
+  url_for('static', filename='jquery.timer.js') }}"></script>
+          <script>
+        $(function(){
+                $.post('/getTransforms/{{id}}',function(data){
+                    var url = '{{ url }}';
+                    var count =0;
+                    $.each(data['rows'][0],function(index,value){
+                        if(count > 1) {
+                            $("#table").append('<tr><td><div>' + value + '</div></td><td><img class="image" src="' + url +'/'+ value + '"/></td></tr>');
+                        }
+                        count=count+1;
+                    });
+                     if(!data['rows'].length){
+                          $("#images" ).append('<div>No Transformations exist for image!</div>');
+                     }
+                     else{
+                         $('#table').show();
+                     }
+                });
+        });
+     </script>
+
+ <title>{{title}}</title>
+  </head>
+  <body >
+   <h1>{{title}}</h1>
+   <form action='{{url_for('image_list')}}' method='get'>
+        <input type='submit' value='Back'/ >
+    </form>
+   <div id="redirect">
+   </div>
+    <ul id='images'>
+    </ul>
+    <table id="table" hidden>
+        <tr>
+            <th>
+                Key Name
+            </th>
+            <th>
+                Image
+            </th>
+        </tr>
+    </table>
+  </body>
+</html>

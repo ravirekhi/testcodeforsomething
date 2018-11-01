@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+  {% block content %}
+<html>
+    <head>
+        <style>
+          table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+          td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+      </style>
+        <title>{{title}}</title>
+             <script type=text/javascript src="{{
+  url_for('static', filename='jquery-3.1.1.js') }}"></script>
+       <script type=text/javascript src="{{
+  url_for('static', filename='jquery.timer.js') }}"></script>
+          <script>
+               $(function() {
+
+                   if($('#policyStatus').val() == 1){
+                       $('#statusPlcyBtn').text("Disable");
+                   }
+                   else{
+                       $('#statusPlcyBtn').text("Enable");
+                   }
+
+                     $('#editPlcyBtn').click(function () {
+                           $('.asplcy').removeAttr('disabled');
+                            return;
+                       });
+                        $('#statusPlcyBtn').bind('click', function () {
+                            if($('#statusPlcyBtn').text() === "Disable") {
+                                $(this).text("Enable");
+                                $.getJSON("/editPolicyStatus", {
+                                    plcy_status: 0
+                                }, function (data) {
+                                    alert("Auto Scaling policy disabled");
+                                    $(this).text("Enable");
+                                });
+                            }
+                            else {
+                                 $(this).text("Disable");
+                                $.getJSON("/editPolicyStatus", {
+                                    plcy_status: 1
+                                }, function (data) {
+                                    alert("Auto Scaling policy enabled");
+
+                                });
+                            }
+                          });
+               });
+       </script>
+    </head>
+    <body>
+        <h1>{{title}}</h1>
+        <a id="refresh" href="{{url_for('workers_list')}}" hidden> Page Refresh</a>
+        <div class='error'>{{error_msg if error_msg != None}}</div>
+          <form action='{{url_for('welcome')}}' method='get'>
+              <input type='submit' value='Back'/></form>
+
+<form action="{{ url_for('save_new_policy') }}" method='post'>
+{% for row in cursor %}
+    {% if row[0] != 7 %}
+        <div>
+        <label>{{ row[3] }}:</label>
+        <input name="{{ row[1] }}" class="asplcy" type="number"  value="{{ row[2] }}" required disabled/>
+        </div>
+        {% else %}
+         <div>
+        <label hidden>{{ row[3] }}:</label>
+        <input id="policyStatus" name="{{ row[1] }}" class="asplcy" type="number"  value="{{ row[2] }}" hidden/>
+        </div>
+     {% endif %}
+ {% endfor %}
+
+     <button type=button id="editPlcyBtn">Edit</button>
+    <button id="statusPlcyBtn" type=button >Disable </button>
+<input class="asplcy" type='submit' value='Save' disabled>
+</form>
+
+
+    </body>
+</html>
+{% endblock %}

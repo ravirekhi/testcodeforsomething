@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+  {% block content %}
+<html>
+    <head>
+
+              <style>
+          table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+          td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+      </style>
+        <title>{{title}}</title>
+      <script type=text/javascript src="{{
+  url_for('static', filename='jquery-3.1.1.js') }}"></script>
+       <script type=text/javascript src="{{
+  url_for('static', filename='jquery.timer.js') }}"></script>
+          <script>
+               $(function() {
+                   var timeout = 60000;
+                   var avgCPU60 = 0;
+                    getStats();
+
+                 $('#refreshISBtn').bind('click', function () {
+                        {% for instance in instances %}
+                        $.post('/updateIncidentStatus/{{ instance.id }}', function (data) {
+                               if (typeof (data) != "string") {
+                                   var stats = data['InstanceState'];
+                                   $('#istate').html(stats);
+                               }
+                           });
+                     {% endfor %}
+                        return false;
+                       });
+
+                   function getStats() {
+
+                       {% for instance in instances %}
+
+                           $.post('/getallCPUUtilization/{{ instance.id }}', function (data) {
+                               if (typeof (data) != "string") {
+                                   if (data[0]['Datapoints']['Datapoints'].length > 0) {
+                                       var stats = data[0]['Datapoints']['Datapoints'][0];
+                                       $('#' + '{{ instance.id }}' + '-60').html(stats['Average'].toFixed(2));
+                                   }
+                                   if (data[1]['Datapoints']['Datapoints'].length > 0) {
+                                       var stats = data[1]['Datapoints']['Datapoints'][0];
+                                       $('#' + '{{ instance.id }}' + '-300').html(stats['Average'].toFixed(2));
+                                   }
+                                   if (data[2]['Datapoints']['Datapoints'].length > 0) {
+                                       var stats = data[2]['Datapoints']['Datapoints'][0];
+                                       $('#' + '{{ instance.id }}' + '-3600').html(stats['Average'].toFixed(2));
+                                   }
+                               }
+                           });
+                           $.post('/updateIncidentStatus/{{ instance.id }}', function (data) {
+                               if (typeof (data) != "string") {
+                                   var stats = data['InstanceState'];
+                                   $('#istate').html(stats);
+                               }
+                           });
+                       {% endfor %}
+                       setTimeout(calTotalCPU, 5000);
+                   }
+
+                   var timer = $.timer(timeout, getStats);
+
+                   $('#removeBtn').click(function () {
+                       checked = $("input[type=checkbox]:checked").length;
+
+                       if (!checked) {
+                           alert("Please check at least one checkbox.");
+                           return false;
+                       }
+
+                   });
+                   $('#editPlcyBtn').click(function () {
+                       $('.asplcy').removeAttr('disabled');
+
+                   });
+
+                    $('#refreshBtn').click(function () {
+                       getStats();
+
+
+                   });
+            function calTotalCPU(){
+                        avgCPU60 = 0;
+                       var stats60 = $('.cpu60');
+                       var count = $("input[type=checkbox]").length;
+                       if(count == 0) {
+                           return false;
+                       }
+                       for (var i = 0; i < count; ++i) {
+                           if (isNaN(parseFloat(stats60[i].innerHTML))){
+                               $('#avgCPU60').html("");
+                               return false;
+                           }
+                           avgCPU60 += parseFloat(stats60[i].innerHTML);
+                       }
+                       avgCPU60 =(parseFloat(avgCPU60)/count).toFixed(2);
+                       $('#avgCPU60').html(avgCPU60);
+                       return true
+                    }
+               });
+       </script>
+    </head>
+    <body>
+        <h1>{{title}}</h1>
+        <a id="refresh" href="{{url_for('workers_list')}}" hidden> Page Refresh</a>
+        <div class='error'>{{error_msg if error_msg != None}}</div>
+          <form action='{{url_for('welcome')}}' method='get'>
+              <input type='submit' value='Back'/></form>
+    <form action="{{url_for('createInstance')}}" method="post">
+
+        <input id="addBtn" type="submit" value="Add New Instances">
+        Quantity: <input id="qty" type="number" name="qty" min=1 required/>
+
+    </form>
+
+     <form action="{{url_for('removeInstance')}}" method="post">
+    <table>
+    <thead>
+            <th></th>
+           <th>Worker Instance ID</th>
+           <th>Instance Status <button type=button id="refreshISBtn">Refresh</button></th>
+           <th>Average CPU utilization (per Instance) <button type=button id="refreshBtn">Refresh</button></th>
+
+    </thead>
+    {% for instance in instances %}
+        <tr>
+        <td><input type="checkbox" name="selected" value="{{ instance.id }}" id="{{ instance.id }}"  /> </td>
+            <td>{{ instance.id }}</td>
+            <td><div id="istate">{{  instance.state['Name'] }}</div></td>
+            <td>
+                <div>Last 1 minute: <span class="cpu60" id="{{ instance.id }}-60"></span></div>
+                <div>Last 5 minutes: <span id="{{ instance.id }}-300"></span></div>
+                 <div>Last 1 hour: <span id="{{ instance.id }}-3600"></span></div>
+            </td>
+
+        </tr>
+    {% endfor %}
+    </table>
+      <input type="submit" id="removeBtn" value="Remove Selected Instances">
+     </form>
+<br>
+        <div>Average CPU Utilization of <em>ALL</em> running images (Last 1 minute):<span id="avgCPU60"></span></div>
+    </body>
+</html>
+{% endblock %}

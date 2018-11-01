@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+           <script type=text/javascript src="{{
+  url_for('static', filename='jquery-3.1.1.js') }}"></script>
+       <script type=text/javascript src="{{
+  url_for('static', filename='jquery.timer.js') }}"></script>
+        <script>
+            $(function()
+            {
+                $('#delete').click(function () {
+                    if (window.confirm("Are you sure about this? All data will be permanently deleted!")) {
+                        location.href = this.href;
+                    }
+                    else{
+                        return false;
+                    }
+                });
+            });
+        </script>
+        <title>{{title}}</title>
+    </head>
+    <body>
+
+        <h1>{{title}}</h1>
+         <div class='error'>{{error_msg if error_msg != None}}</div>
+        <div><a href="{{url_for('workers_list')}}">List workers</a></div>
+         <div><a href="{{url_for('view_as_plcy')}}">Configure Auto Scaling Policy</a></div>
+        <div><a id="delete" href="{{url_for('deleteData')}}">Delete all application data</a></div>
+        <div><a href="{{url_for('logout')}}">Log out</a></div>
+{#        <div><a href="{{url_for('logout')}}">Delete all data</a></div>#}
+
+    </body>
+</html>

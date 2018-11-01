@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{title}}</title>
+      <script type=text/javascript src="{{
+  url_for('static', filename='jquery-3.1.1.js') }}"></script>
+       <script type=text/javascript src="{{
+  url_for('static', filename='jquery.timer.js') }}"></script>
+        <script>
+            $(function()
+            {
+
+             $('#backBtn').click(function () {
+
+                    $('#back')[0].click();
+
+                   });
+               });
+        </script>
+    </head>
+    <body>
+        <h1>{{title}}</h1>
+        <div class='error'><bold>{{error_msg if error_msg != None}}</bold></div>
+        <form id="upload-file" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="file" ><b>Upload image here</b></label>
+                <input type="file" name="file" required accept="image/*" />
+                <p>Upload any image file (.jpg .png .jpeg, .bmp etc)</p>
+            </div>
+        <div>
+            <button id="backBtn" type="button">Cancel</button>
+            <button id="upload-file-btn" type="submit" value="Upload">Upload</button>
+        </div>
+        </form>
+     <a id="back" href="{{url_for('welcome')}}" hidden> Back</a>
+    </body>
+</html>

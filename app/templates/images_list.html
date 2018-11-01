@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <style>
+          table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+          td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+      </style>
+      <script type=text/javascript src="{{
+  url_for('static', filename='jquery-3.1.1.js') }}"></script>
+       <script type=text/javascript src="{{
+  url_for('static', filename='jquery.timer.js') }}"></script>
+        <script>
+            $(function(){
+             $(document).on('click',".image",function(){
+                var id = $(this).attr('id');
+                 window.location.replace("/transforms/"+id);
+    });
+
+	    });
+    </script>
+ <title>{{title}}</title>
+  </head>
+
+  <body>
+         {% block content %}
+   <h1>{{title}}</h1>
+   <form action='{{url_for('welcome')}}' method='get'>
+        <input type='submit' value='Back'/ >
+    </form>
+         {% if images %}
+          <div>Click on the thumbnail to view the specific image and its transforms</div>
+    <table id="table">
+         <tr>
+            <th>
+                Key Name
+            </th>
+            <th>
+                Thumbnail
+            </th>
+        </tr>
+    {% for row in images %}
+        <tr>
+            <td>{{row[2]}}</td>
+            <td><img class="image" src="{{s3_url}}/{{row[2]}}" height="100" width="100" id="{{row[0]}}"/></td>
+        </tr>
+    {% endfor %}
+    </table>
+         {% else %}
+            <div>No images uploaded</div>
+         {% endif %}
+   {% endblock %}
+  </body>
+
+</html>
